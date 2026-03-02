@@ -1,6 +1,5 @@
 import com.example.tickets.IncidentTicket;
 import com.example.tickets.TicketService;
-
 import java.util.List;
 
 /**
@@ -19,15 +18,20 @@ public class TryIt {
         IncidentTicket t = service.createTicket("TCK-1001", "reporter@example.com", "Payment failing on checkout");
         System.out.println("Created: " + t);
 
-        // Demonstrate post-creation mutation through service
-        service.assign(t, "agent@example.com");
-        service.escalateToCritical(t);
-        System.out.println("\nAfter service mutations: " + t);
+        IncidentTicket assigned = service.assign(t, "agent@example.com");
+        IncidentTicket escalated = service.escalateToCritical(assigned);
 
-        // Demonstrate external mutation via leaked list reference
-        List<String> tags = t.getTags();
-        tags.add("HACKED_FROM_OUTSIDE");
-        System.out.println("\nAfter external tag mutation: " + t);
+        System.out.println("\nOriginal remains unchanged: " + t);
+        System.out.println("After service updates (new instance): " + escalated);
+
+        try {
+            List<String> tags = escalated.getTags();
+            tags.add("HACKED_FROM_OUTSIDE");
+        } catch (UnsupportedOperationException ex) {
+            System.out.println("\nTags are immutable from outside.");
+        }
+
+        System.out.println("After attempted external tag mutation: " + escalated);
 
         // Starter compiles; after refactor, you should redesign updates to create new objects instead.
     }
