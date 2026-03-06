@@ -20,29 +20,31 @@ import java.util.Map;
  *  2) Block reflection-based multiple construction
  *  3) Preserve singleton on serialization (readResolve)
  */
+
 public class MetricsRegistry implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private static boolean initialized;
+    private static volatile MetricsRegistry INSTANCE;
+
     private final Map<String, Long> counters = new HashMap<>();
 
     private MetricsRegistry() {
-        synchronized (MetricsRegistry.class) {
-            if (initialized) {
-                throw new IllegalStateException("Use getInstance(); singleton already initialized");
-            }
-            initialized = true;
+        if (INSTANCE != null) {
+            throw new IllegalStateException("Singleton already initialized");
         }
     }
 
     public static MetricsRegistry getInstance() {
-        return Holder.INSTANCE;
-    }
-
-    private static class Holder {
-        private static final MetricsRegistry INSTANCE = new MetricsRegistry();
+        if (INSTANCE == null) {
+            synchronized (MetricsRegistry.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new MetricsRegistry();
+                }
+            }
+        }
+        return INSTANCE;
     }
 
     public synchronized void setCount(String key, long value) {

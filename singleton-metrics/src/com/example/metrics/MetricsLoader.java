@@ -33,6 +33,7 @@ public class MetricsLoader {
             }
             registry.setCount(key, v);
         }
+
         return registry;
     }
 }
