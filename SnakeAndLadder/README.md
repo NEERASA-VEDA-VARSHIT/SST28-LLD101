@@ -1,0 +1,1 @@
+// SRP was considered, with minor trade-offs made for simplicity.
